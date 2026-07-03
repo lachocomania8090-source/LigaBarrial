@@ -1,6 +1,6 @@
-package com.example.application.repository;
+package com.example.repository;
 
-import com.example.application.model.Torneo;
+import com.example.modelos.Torneo;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

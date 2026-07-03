@@ -1,6 +1,6 @@
-package com.example.application.repository;
+package com.example.repository;
 
-import com.example.application.model.Jugador;
+import com.example.modelos.Jugador;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;

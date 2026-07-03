@@ -1,4 +1,4 @@
-package com.example.Modelos;
+package com.example.modelos;
 
 public class EstadisticaEquipo {
 

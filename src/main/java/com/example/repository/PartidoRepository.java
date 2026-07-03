@@ -1,6 +1,5 @@
-package com.example.application.repository;
-
-import com.example.application.model.Partido;
+package com.example.repository;
+import com.example.modelos.Partido;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

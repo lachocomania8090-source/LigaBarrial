@@ -1,6 +1,6 @@
-package com.example.application.repository;
+package com.example.repository;
 
-import com.example.application.model.Inscripcion;
+import com.example.modelos.Inscripcion;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

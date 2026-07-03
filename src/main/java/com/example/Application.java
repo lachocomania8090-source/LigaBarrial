@@ -1,21 +1,32 @@
-package com.example;
+package com.example; // Asegúrate de que sea tu paquete
 
-import com.vaadin.flow.theme.aura.Aura;
+import com.example.modelos.Torneo;
+import com.example.repository.TorneoRepository;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.Push;
+import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-@StyleSheet(Aura.STYLESHEET)
-@StyleSheet("styles.css") // Your custom styles
-@Push
-public class Application implements AppShellConfigurator {
+public class Application {
 
     public static void main(String[] args) {
+        // 👇 ESTA ES EL ARMA SECRETA 👇
+        // Forzamos la conexión a la nube, ignorando el application.properties
+        System.setProperty("spring.data.mongodb.uri", "mongodb+srv://adminLiga:F1lPiKTuoGFHL7JC@cluster0.rhe2iyi.mongodb.net/liga_barrial?retryWrites=true&w=majority");
+
         SpringApplication.run(Application.class, args);
     }
 
+    @Bean
+    public CommandLineRunner probarConexion(TorneoRepository torneoRepo) {
+        return args -> {
+            System.out.println("⏳ Conectando a MongoDB Atlas...");
+            Torneo torneoPrueba = new Torneo();
+            torneoPrueba.setNombre("Torneo de Prueba Blindado");
+            torneoPrueba.setEstado("ACTIVO");
+            torneoRepo.save(torneoPrueba);
+            System.out.println("✅ ¡Conexión exitosa! Torneo guardado en la nube.");
+        };
+    }
 }
