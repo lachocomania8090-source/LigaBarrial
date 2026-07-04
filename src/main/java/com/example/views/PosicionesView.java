@@ -17,6 +17,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Route(value = "posiciones", layout = MainLayout.class)
@@ -93,8 +94,20 @@ public class PosicionesView extends VerticalLayout {
 		grid.addClassNames(LumoUtility.Border.ALL);
 		grid.setSizeFull();
 
-		// Columna: Equipo (nombre)
-		grid.addColumn(est -> equipoService.obtenerPorId(est.getEquipoId()).map(Equipo::getNombre).orElse("-"))
+		// Columna: Equipo (nombre) - con resaltado para los primeros 3 lugares
+		grid.addColumn(new ComponentRenderer<>(est -> {
+			List<EstadisticaEquipo> items = grid.getGenericDataView().getItems().toList();
+			int index = items.indexOf(est);
+
+			Span nombreSpan = new Span(equipoService.obtenerPorId(est.getEquipoId()).map(Equipo::getNombre).orElse("-"));
+
+			// Resaltar los primeros 3 lugares
+			if (index >= 0 && index < 3) {
+				nombreSpan.addClassNames(LumoUtility.Background.SUCCESS_10);
+			}
+
+			return nombreSpan;
+		}))
 			.setHeader("Equipo")
 			.setAutoWidth(true);
 
@@ -119,12 +132,22 @@ public class PosicionesView extends VerticalLayout {
 			return s;
 		})).setHeader("PTS").setAutoWidth(true);
 
+
 		return grid;
 	}
 
 	private void actualizarTabla(String torneoId) {
 		try {
-			grid.setItems(estadisticaService.obtenerTablaPosiciones(torneoId));
+			List<EstadisticaEquipo> estadisticas = estadisticaService.obtenerTablaPosiciones(torneoId);
+
+			// Ordenar por puntos (descendente) y por diferencia de goles (descendente) como desempate
+			estadisticas.sort(
+				Comparator.comparing(EstadisticaEquipo::getPuntos)
+					.reversed()
+					.thenComparing(est -> est.getGolesFavor() - est.getGolesContra(), Comparator.reverseOrder())
+			);
+
+			grid.setItems(estadisticas);
 		} catch (Exception ex) {
 			Notification.show("Error al cargar tabla de posiciones: " + ex.getMessage(), 3000, Notification.Position.BOTTOM_CENTER);
 			grid.setItems(List.of());

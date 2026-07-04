@@ -36,7 +36,7 @@ public class MainLayout extends AppLayout {
         nav.addItem(new SideNavItem("Equipos", EquiposView.class, VaadinIcon.USERS.create()));
         nav.addItem(new SideNavItem("Jugadores", JugadoresView.class, VaadinIcon.USER.create()));
         nav.addItem(new SideNavItem("Partidos", PartidosView.class, VaadinIcon.PRESENTATION.create()));
-        // nav.addItem(new SideNavItem("Posiciones", PosicionesView.class, VaadinIcon.TROPHY.create()));
+        nav.addItem(new SideNavItem("Posiciones", PosicionesView.class, VaadinIcon.TROPHY.create()));
 
         Scroller scroller = new Scroller(nav);
         addToDrawer(scroller);

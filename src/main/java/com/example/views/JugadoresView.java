@@ -5,6 +5,7 @@ import com.example.logica.JugadorService;
 import com.example.modelos.Equipo;
 import com.example.modelos.Jugador;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
@@ -12,6 +13,8 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -19,6 +22,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import java.util.Optional;
 
 @Route(value = "jugadores", layout = MainLayout.class)
 public class JugadoresView extends VerticalLayout {
@@ -111,15 +116,44 @@ public class JugadoresView extends VerticalLayout {
             .setSortable(false)
             .setAutoWidth(true);
 
-        // Evento de doble clic para editar
-        grid.addItemDoubleClickListener(event -> {
-            Jugador jugador = event.getItem();
-            abrirDialogoEditar(jugador);
-        });
+        // Columna: Acciones
+        grid.addComponentColumn(jugador -> crearBotonesAcciones(jugador))
+            .setHeader("Acciones")
+            .setAutoWidth(true);
 
         // Hacer que el grid ocupe todo el espacio disponible
         grid.setSizeFull();
         return grid;
+    }
+
+    private HorizontalLayout crearBotonesAcciones(Jugador jugador) {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.setSpacing(true);
+        layout.setAlignItems(Alignment.CENTER);
+
+        // Botón Editar
+        Button editarButton = new Button(VaadinIcon.EDIT.create());
+        editarButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        editarButton.setTooltipText("Editar jugador");
+        editarButton.addClickListener(e -> abrirDialogoEditar(jugador));
+
+        // Botón Eliminar
+        Button eliminarButton = new Button(VaadinIcon.TRASH.create());
+        eliminarButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        eliminarButton.addClassNames(LumoUtility.TextColor.ERROR);
+        eliminarButton.setTooltipText("Eliminar jugador");
+        eliminarButton.addClickListener(e -> eliminarJugador(jugador));
+
+        layout.add(editarButton, eliminarButton);
+        return layout;
+    }
+
+    private void eliminarJugador(Jugador jugador) {
+        jugadorService.eliminar(jugador);
+        cargarJugadores();
+        searchField.clear();
+        Notification.show("Jugador eliminado correctamente", 3000, Notification.Position.BOTTOM_CENTER);
     }
 
     private String obtenerNombreEquipo(String equipoId) {
@@ -215,7 +249,12 @@ public class JugadoresView extends VerticalLayout {
         binder.forField(equipoBox)
             .asRequired("El equipo es requerido")
             .bind(
-                j -> equipoService.obtenerPorId(j.getEquipoId()).orElse(null),
+                j -> {
+                    if (j.getEquipoId() != null && !j.getEquipoId().isEmpty()) {
+                        return equipoService.obtenerPorId(j.getEquipoId()).orElse(null);
+                    }
+                    return null;
+                },
                 (j, equipo) -> {
                     if (equipo != null) {
                         j.setEquipoId(equipo.getId());
@@ -232,15 +271,27 @@ public class JugadoresView extends VerticalLayout {
         Button guardarButton = new Button("Guardar");
         guardarButton.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY);
         guardarButton.addClickListener(e -> {
-            if (binder.writeBeanIfValid(jugador)) {
-                jugadorService.guardar(jugador);
-                dialog.close();
-                cargarJugadores();
-                searchField.clear();
-                String mensaje = esEdicion ? "Jugador actualizado correctamente" : "Jugador creado correctamente";
-                Notification.show(mensaje, 3000, Notification.Position.BOTTOM_CENTER);
-            } else {
-                Notification.show("Por favor, completa todos los campos requeridos", 3000, Notification.Position.BOTTOM_CENTER);
+            try {
+                if (binder.writeBeanIfValid(jugador)) {
+                    jugadorService.guardar(jugador);
+                    dialog.close();
+                    cargarJugadores();
+                    searchField.clear();
+                    String mensaje = esEdicion ? "Jugador actualizado correctamente" : "Jugador creado correctamente";
+                    Notification notif = new Notification(mensaje, 3000, Notification.Position.BOTTOM_CENTER);
+                    notif.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    notif.open();
+                } else {
+                    Notification notif = new Notification("Por favor, completa todos los campos requeridos", 3000, Notification.Position.BOTTOM_CENTER);
+                    notif.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                    notif.open();
+                }
+            } catch (Exception ex) {
+                String mensajeError = "Error al guardar jugador: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString());
+                Notification notif = new Notification(mensajeError, 5000, Notification.Position.BOTTOM_CENTER);
+                notif.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                notif.open();
+                ex.printStackTrace();
             }
         });
 

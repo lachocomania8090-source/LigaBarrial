@@ -3,12 +3,15 @@ package com.example.views;
 import com.example.logica.EquipoService;
 import com.example.modelos.Equipo;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
@@ -93,15 +96,44 @@ public class EquiposView extends VerticalLayout {
             .setSortable(true)
             .setAutoWidth(true);
 
-        // Evento de doble clic para editar
-        grid.addItemDoubleClickListener(event -> {
-            Equipo equipo = event.getItem();
-            abrirDialogoEditar(equipo);
-        });
+        // Columna: Acciones
+        grid.addComponentColumn(equipo -> crearBotonesAcciones(equipo))
+            .setHeader("Acciones")
+            .setAutoWidth(true);
 
         // Hacer que el grid ocupe todo el espacio disponible
         grid.setSizeFull();
         return grid;
+    }
+
+    private HorizontalLayout crearBotonesAcciones(Equipo equipo) {
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setPadding(false);
+        layout.setSpacing(true);
+        layout.setAlignItems(Alignment.CENTER);
+
+        // Botón Editar
+        Button editarButton = new Button(VaadinIcon.EDIT.create());
+        editarButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        editarButton.setTooltipText("Editar equipo");
+        editarButton.addClickListener(e -> abrirDialogoEditar(equipo));
+
+        // Botón Eliminar
+        Button eliminarButton = new Button(VaadinIcon.TRASH.create());
+        eliminarButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+        eliminarButton.addClassNames(LumoUtility.TextColor.ERROR);
+        eliminarButton.setTooltipText("Eliminar equipo");
+        eliminarButton.addClickListener(e -> eliminarEquipo(equipo));
+
+        layout.add(editarButton, eliminarButton);
+        return layout;
+    }
+
+    private void eliminarEquipo(Equipo equipo) {
+        equipoService.eliminar(equipo);
+        cargarEquipos();
+        searchField.clear();
+        Notification.show("Equipo eliminado correctamente", 3000, Notification.Position.BOTTOM_CENTER);
     }
 
     private void cargarEquipos() {
