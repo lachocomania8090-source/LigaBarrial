@@ -4,6 +4,7 @@ public class Torneo {
     private String id;
     private String nombre;
     private String estado;
+    private String nombreCampeon;
 
 
     public String getId() {
@@ -28,5 +29,13 @@ public class Torneo {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getNombreCampeon() {
+        return nombreCampeon;
+    }
+
+    public void setNombreCampeon(String nombreCampeon) {
+        this.nombreCampeon = nombreCampeon;
     }
 }

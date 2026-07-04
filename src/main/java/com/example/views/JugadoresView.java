@@ -15,6 +15,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -32,6 +34,8 @@ public class JugadoresView extends VerticalLayout {
     private final EquipoService equipoService;
     private Grid<Jugador> grid;
     private TextField searchField;
+    private Tabs tabs;
+    private ComboBox<Equipo> filtroEquipo;
 
     @Autowired
     public JugadoresView(JugadorService jugadorService, EquipoService equipoService) {
@@ -45,6 +49,7 @@ public class JugadoresView extends VerticalLayout {
 
         // Crear componentes
         add(crearTitulo());
+        add(crearTabs());
         add(crearBarraHerramientas());
         add(crearGrid());
 
@@ -56,6 +61,49 @@ public class JugadoresView extends VerticalLayout {
         H2 titulo = new H2("Gestión de Jugadores");
         titulo.addClassNames(LumoUtility.Margin.Bottom.LARGE);
         return titulo;
+    }
+
+    private VerticalLayout crearTabs() {
+        VerticalLayout tabsContainer = new VerticalLayout();
+        tabsContainer.setPadding(false);
+        tabsContainer.setSpacing(false);
+
+        // Crear las dos tabs
+        Tab tabTodos = new Tab("Todos los jugadores");
+        Tab tabPorEquipo = new Tab("Jugadores por equipo");
+
+        // ComboBox para filtrar por equipo (inicialmente oculto)
+        filtroEquipo = new ComboBox<>("Seleccionar Equipo");
+        filtroEquipo.setWidthFull();
+        filtroEquipo.setItems(equipoService.obtenerTodos());
+        filtroEquipo.setItemLabelGenerator(Equipo::getNombre);
+        filtroEquipo.setVisible(false);
+        filtroEquipo.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                grid.setItems(jugadorService.obtenerPorEquipo(e.getValue().getId()));
+            }
+        });
+
+        // Crear el contenedor para el comboBox
+        HorizontalLayout filtroLayout = new HorizontalLayout(filtroEquipo);
+        filtroLayout.setWidthFull();
+        filtroLayout.setPadding(true);
+        filtroLayout.setVisible(false);
+
+        // Crear las Tabs
+        tabs = new Tabs(tabTodos, tabPorEquipo);
+        tabs.addSelectedChangeListener(e -> {
+            if (e.getSelectedTab() == tabTodos) {
+                filtroLayout.setVisible(false);
+                filtroEquipo.setValue(null);
+                cargarJugadores();
+            } else if (e.getSelectedTab() == tabPorEquipo) {
+                filtroLayout.setVisible(true);
+            }
+        });
+
+        tabsContainer.add(tabs, filtroLayout);
+        return tabsContainer;
     }
 
     private HorizontalLayout crearBarraHerramientas() {
