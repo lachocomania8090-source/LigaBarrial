@@ -25,6 +25,10 @@ public class TorneoService {
         return torneoRepo.save(torneo);
     }
 
+    public List<Torneo> obtenerTodos() {
+        return torneoRepo.findAll();
+    }
+
     public Inscripcion inscribirEquipo(String torneoId, String equipoId, double valor) {
         // 1. Guardar la inscripción
         Inscripcion inscripcion = new Inscripcion();

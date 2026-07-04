@@ -6,6 +6,8 @@ import com.example.repository.EstadisticaEquipoRepository;
 import com.example.repository.PartidoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PartidoService {
@@ -14,6 +16,22 @@ public class PartidoService {
     private PartidoRepository partidoRepo;
     @Autowired
     private EstadisticaEquipoRepository estadisticaRepo;
+
+    public List<Partido> obtenerTodos() {
+        return partidoRepo.findAll();
+    }
+
+    public Optional<Partido> obtenerPorId(String id) {
+        return partidoRepo.findById(id);
+    }
+
+    public Partido guardar(Partido partido) {
+        return partidoRepo.save(partido);
+    }
+
+    public void eliminar(String id) {
+        partidoRepo.deleteById(id);
+    }
 
     public Partido registrarResultado(String partidoId, int golesLocal, int golesVisitante) {
         Partido partido = partidoRepo.findById(partidoId)

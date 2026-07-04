@@ -33,8 +33,9 @@ public class MainLayout extends AppLayout {
         // Usamos VaadinIcon en lugar de LineAwesomeIcon
         nav.addItem(new SideNavItem("Dashboard", DashboardView.class, VaadinIcon.CHART_LINE.create()));
 
-        // nav.addItem(new SideNavItem("Equipos", EquiposView.class, VaadinIcon.USERS.create()));
-        // nav.addItem(new SideNavItem("Partidos", PartidosView.class, VaadinIcon.FUTBOL.create()));
+        nav.addItem(new SideNavItem("Equipos", EquiposView.class, VaadinIcon.USERS.create()));
+        nav.addItem(new SideNavItem("Jugadores", JugadoresView.class, VaadinIcon.USER.create()));
+        nav.addItem(new SideNavItem("Partidos", PartidosView.class, VaadinIcon.PRESENTATION.create()));
         // nav.addItem(new SideNavItem("Posiciones", PosicionesView.class, VaadinIcon.TROPHY.create()));
 
         Scroller scroller = new Scroller(nav);
