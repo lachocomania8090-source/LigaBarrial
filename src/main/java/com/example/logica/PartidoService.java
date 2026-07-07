@@ -87,4 +87,8 @@ public class PartidoService {
         estadisticaRepo.save(local);
         estadisticaRepo.save(visitante);
     }
+
+    public List<Partido> obtenerPartidosPorTorneo(String torneoId) {
+        return partidoRepo.findByTorneoId(torneoId); // Asegúrate de tener este método en tu PartidoRepository
+    }
 }

@@ -50,7 +50,7 @@ public class TorneoService {
     }
 
     public Torneo actualizar(Torneo torneo) {
-        // Si el torneo está siendo finalizado, registrar al ganador
+        // Solo registra ganador si el torneo pasa a FINALIZADO. Si es CANCELADO, omite este paso.
         if ("FINALIZADO".equalsIgnoreCase(torneo.getEstado()) && torneo.getNombreCampeon() == null) {
             registrarGanador(torneo);
         }
